@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reloj Analógico </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .reloj {
+            width: 300px;
+            height: 300px;
+            border: 10px solid #333;
+            border-radius: 50%;
+            position: relative;
+            background: url(https://i.pinimg.com/736x/aa/14/c7/aa14c79fa343c7ba2b95e62cea3b9cd8.jpg) no-repeat center center/cover;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .manecilla {
+            position: absolute;
+            background-color: #333;
+            transform-origin: bottom center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .horas {
+            width: 8px;
+            height: 80px;
+            top: 70px;
+            left: 146px;
+            background-color: #000;
+        }
+
+        .minutos {
+            width: 6px;
+            height: 120px;
+            top: 30px;
+            left: 147px;
+            background-color: #555;
+        }
+
+        .segundos {
+            width: 4px;
+            height: 140px;
+            top: 10px;
+            left: 148px;
+            background-color: #ff0000;
+        }
+
+        .centro {
+            width: 20px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 140px;
+            left: 140px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="reloj">
+        <div class="manecilla horas" id="horas"></div>
+        <div class="manecilla minutos" id="minutos"></div>
+        <div class="manecilla segundos" id="segundos"></div>
+        <div class="centro"></div>
+    </div>
+
+    <script>
+        const manecillaHoras = document.getElementById('horas');
+        const manecillaMinutos = document.getElementById('minutos');
+        const manecillaSegundos = document.getElementById('segundos');
+
+        let isDragging = false;
+        let manecillaActiva = null;
+
+        // Función para calcular el ángulo basado en la posición del cursor
+        function calcularAngulo(event, elemento) {
+            const rect = elemento.getBoundingClientRect();
+            const centroX = rect.left + rect.width / 2;
+            const centroY = rect.top + rect.height / 2;
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            const deltaX = mouseX - centroX;
+            const deltaY = mouseY - centroY;
+            return (Math.atan2(deltaY, deltaX) * 180 / Math.PI) + 90; // Ajustar para que 0° esté en la parte superior
+        }
+
+        // Función para actualizar la hora basada en el ángulo
+        function actualizarHora(angulo, tipo) {
+            if (tipo === 'horas') {
+                const horas = Math.round(angulo / 30) % 12; // 30° por hora
+                console.log(`Hora actualizada: ${horas}`);
+            } else if (tipo === 'minutos') {
+                const minutos = Math.round(angulo / 6) % 60; // 6° por minuto
+                console.log(`Minutos actualizados: ${minutos}`);
+            } else if (tipo === 'segundos') {
+                const segundos = Math.round(angulo / 6) % 60; // 6° por segundo
+                console.log(`Segundos actualizados: ${segundos}`);
+            }
+        }
+
+        // Evento al hacer clic en una manecilla
+        function iniciarArrastre(event, manecilla, tipo) {
+            isDragging = true;
+            manecillaActiva = manecilla;
+            document.addEventListener('mousemove', moverManecilla);
+            document.addEventListener('mouseup', detenerArrastre);
+        }
+
+        // Evento al mover el ratón
+        function moverManecilla(event) {
+            if (isDragging && manecillaActiva) {
+                const angulo = calcularAngulo(event, manecillaActiva);
+                manecillaActiva.style.transform = `rotate(${angulo}deg)`;
+
+                // Actualizar la hora según la manecilla activa
+                if (manecillaActiva === manecillaHoras) {
+                    actualizarHora(angulo, 'horas');
+                } else if (manecillaActiva === manecillaMinutos) {
+                    actualizarHora(angulo, 'minutos');
+                } else if (manecillaActiva === manecillaSegundos) {
+                    actualizarHora(angulo, 'segundos');
+                }
+            }
+        }
+
+        // Evento al soltar el clic
+        function detenerArrastre() {
+            isDragging = false;
+            manecillaActiva = null;
+            document.removeEventListener('mousemove', moverManecilla);
+            document.removeEventListener('mouseup', detenerArrastre);
+        }
+
+        // Asignar eventos a las manecillas
+        manecillaHoras.addEventListener('mousedown', (event) => iniciarArrastre(event, manecillaHoras, 'horas'));
+        manecillaMinutos.addEventListener('mousedown', (event) => iniciarArrastre(event, manecillaMinutos, 'minutos'));
+        manecillaSegundos.addEventListener('mousedown', (event) => iniciarArrastre(event, manecillaSegundos, 'segundos'));
+    </script>
+</body>
+</html>
